@@ -1,0 +1,2148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Irene Gold Part 1 — Clean Study &amp; JSON App</title>
+  <style>
+    /* =====================================================================
+       DESIGN SYSTEM & DARK SLATE / INDIGO THEME TOKENS
+       ===================================================================== */
+    :root {
+      --bg-canvas: #090d16;
+      --bg-surface: #0f172a;
+      --bg-surface-2: #162033;
+      --bg-surface-3: #1e293b;
+      --border-subtle: rgba(148, 163, 184, 0.16);
+      --border-strong: rgba(129, 140, 248, 0.35);
+      --text-primary: #f1f5f9;
+      --text-secondary: #cbd5e1;
+      --text-muted: #94a3b8;
+      --accent-indigo: #6366f1;
+      --accent-indigo-hover: #4f46e5;
+      --accent-indigo-soft: rgba(99, 102, 241, 0.16);
+      --accent-cyan: #22d3ee;
+      --accent-emerald: #10b981;
+      --accent-emerald-soft: rgba(16, 185, 129, 0.15);
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --accent-rose-soft: rgba(244, 63, 94, 0.15);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-card: 0 10px 25px -5px rgba(0, 0, 0, 0.45);
+      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-canvas);
+      color: var(--text-primary);
+      line-height: 1.55;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Scrollbars */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: var(--bg-canvas);
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--bg-surface-3);
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #334155;
+    }
+
+    /* =====================================================================
+       HEADER & NAVIGATION
+       ===================================================================== */
+    .app-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(15, 23, 42, 0.94);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .header-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-md);
+      background: linear-gradient(135deg, var(--accent-indigo), var(--accent-cyan));
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 13px;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.25;
+    }
+
+    .brand-subtitle {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .nav-controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .tab-bar {
+      display: inline-flex;
+      background: var(--bg-canvas);
+      padding: 4px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+      gap: 4px;
+    }
+
+    .tab-btn {
+      background: transparent;
+      color: var(--text-muted);
+      border: none;
+      padding: 7px 14px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .tab-btn:hover {
+      color: var(--text-primary);
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-btn.active {
+      background: var(--accent-indigo);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-surface-2);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .btn:hover {
+      background: var(--bg-surface-3);
+      border-color: var(--border-strong);
+    }
+
+    .btn-primary {
+      background: var(--accent-indigo);
+      border-color: var(--accent-indigo);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-indigo-hover);
+    }
+
+    .btn-emerald {
+      background: var(--accent-emerald-soft);
+      border-color: rgba(16, 185, 129, 0.35);
+      color: #6ee7b7;
+    }
+
+    .btn-emerald:hover {
+      background: rgba(16, 185, 129, 0.25);
+    }
+
+    /* =====================================================================
+       SUBJECT PILLS BAR
+       ===================================================================== */
+    .subject-pills-bar {
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .subject-pills-inner {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      overflow-x: auto;
+    }
+
+    .subject-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 13px;
+      border-radius: 999px;
+      font-size: 12.5px;
+      font-weight: 600;
+      background: var(--bg-surface-2);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-subtle);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+
+    .subject-pill:hover {
+      color: #ffffff;
+      border-color: var(--border-strong);
+    }
+
+    .subject-pill.active {
+      background: var(--accent-indigo-soft);
+      color: #c7d2fe;
+      border-color: var(--accent-indigo);
+    }
+
+    .pill-count {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.75);
+      color: var(--text-muted);
+    }
+
+    /* =====================================================================
+       MAIN LAYOUT (SIDEBAR + WORKSPACE)
+       ===================================================================== */
+    .workspace-shell {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      min-height: calc(100vh - 114px);
+    }
+
+    .sidebar {
+      background: var(--bg-surface);
+      border-right: 1px solid var(--border-subtle);
+      padding: 18px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: sticky;
+      top: 112px;
+      height: calc(100vh - 112px);
+      overflow-y: auto;
+    }
+
+    .search-box-wrap {
+      position: relative;
+    }
+
+    .search-input {
+      width: 100%;
+      background: var(--bg-canvas);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 9px 34px 9px 12px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s ease;
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-input:focus {
+      border-color: var(--accent-indigo);
+    }
+
+    .clear-search-btn {
+      position: absolute;
+      right: 8px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      font-size: 14px;
+      cursor: pointer;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+
+    .clear-search-btn:hover {
+      color: #ffffff;
+      background: var(--bg-surface-3);
+    }
+
+    .sidebar-section-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-muted);
+      padding: 0 8px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .topic-nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .topic-nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: var(--radius-sm);
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border: 1px solid transparent;
+      transition: all 0.14s ease;
+    }
+
+    .topic-nav-item:hover {
+      background: var(--bg-surface-2);
+      color: #ffffff;
+    }
+
+    .topic-nav-check {
+      color: var(--accent-emerald);
+      font-weight: 700;
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .mastery-card {
+      background: var(--bg-canvas);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 12px;
+    }
+
+    .mastery-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .mastery-track {
+      height: 7px;
+      background: var(--bg-surface-3);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .mastery-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-indigo), var(--accent-cyan));
+      border-radius: 999px;
+      transition: width 0.25s ease;
+    }
+
+    .main-content {
+      padding: 24px;
+      min-width: 0;
+    }
+
+    .view-panel {
+      display: none;
+    }
+
+    .view-panel.active {
+      display: block;
+    }
+
+    /* =====================================================================
+       NOTES VIEW CARDS & TABLES
+       ===================================================================== */
+    .subject-banner {
+      background: linear-gradient(135deg, var(--bg-surface) 0%, var(--bg-surface-2) 100%);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 20px 24px;
+      margin-bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .subject-meta-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 11.5px;
+      font-weight: 700;
+      background: var(--accent-indigo-soft);
+      color: #c7d2fe;
+      border: 1px solid rgba(99, 102, 241, 0.35);
+    }
+
+    .page-tag {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .subject-heading {
+      font-size: 24px;
+      font-weight: 800;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .subject-desc {
+      font-size: 13.5px;
+      color: var(--text-secondary);
+      max-width: 780px;
+    }
+
+    .search-banner {
+      background: rgba(99, 102, 241, 0.12);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      border-radius: var(--radius-md);
+      padding: 12px 16px;
+      margin-bottom: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      color: #e0e7ff;
+    }
+
+    .topics-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .topic-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-card);
+      scroll-margin-top: 126px;
+    }
+
+    .topic-card.mastered {
+      border-color: rgba(16, 185, 129, 0.45);
+    }
+
+    .topic-header {
+      background: var(--bg-surface-2);
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .topic-title-wrap {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .topic-title {
+      font-size: 17px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .mastery-checkbox-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      background: var(--bg-canvas);
+      border: 1px solid var(--border-subtle);
+      padding: 6px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .mastery-checkbox-label input {
+      accent-color: var(--accent-emerald);
+      width: 15px;
+      height: 15px;
+      cursor: pointer;
+    }
+
+    .topic-body {
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .topic-body.hidden-body {
+      display: none;
+    }
+
+    .table-wrap {
+      width: 100%;
+      overflow-x: auto;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      background: var(--bg-canvas);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      text-align: left;
+    }
+
+    thead th {
+      background: var(--bg-surface-3);
+      color: #f8fafc;
+      font-weight: 700;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    tbody td {
+      padding: 10px 14px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.09);
+      color: var(--text-secondary);
+      vertical-align: top;
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr:hover td {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    td.col-key {
+      font-weight: 600;
+      color: #a5b4fc;
+      width: 30%;
+      min-width: 165px;
+    }
+
+    .pearls-box {
+      background: rgba(99, 102, 241, 0.09);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+    }
+
+    .pearls-title {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #a5b4fc;
+      margin-bottom: 8px;
+    }
+
+    .pearls-list {
+      padding-left: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+
+    mark.search-hit {
+      background: rgba(245, 158, 11, 0.32);
+      color: #fef3c7;
+      padding: 0 3px;
+      border-radius: 3px;
+    }
+
+    /* =====================================================================
+       FLASHCARDS & QUIZ VIEWS
+       ===================================================================== */
+    .mode-card-shell {
+      max-width: 820px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .toolbar-panel {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 16px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .select-control {
+      background: var(--bg-canvas);
+      color: var(--text-primary);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 8px 12px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .flashcard-stage {
+      background: linear-gradient(160deg, var(--bg-surface-2) 0%, var(--bg-surface) 100%);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      padding: 36px 28px;
+      min-height: 290px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      cursor: pointer;
+      box-shadow: var(--shadow-card);
+      gap: 14px;
+    }
+
+    .flashcard-stage.flipped {
+      border-color: var(--accent-emerald);
+      background: linear-gradient(160deg, rgba(16, 185, 129, 0.12) 0%, var(--bg-surface) 100%);
+    }
+
+    .card-side-label {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--accent-cyan);
+    }
+
+    .flashcard-stage.flipped .card-side-label {
+      color: #6ee7b7;
+    }
+
+    .card-main-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: #ffffff;
+      max-width: 640px;
+    }
+
+    .card-sub-text {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      max-width: 600px;
+    }
+
+    .card-nav-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .quiz-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      box-shadow: var(--shadow-card);
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .quiz-opt-btn {
+      width: 100%;
+      text-align: left;
+      padding: 13px 16px;
+      border-radius: var(--radius-md);
+      background: var(--bg-canvas);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-primary);
+      font-size: 13.5px;
+      cursor: pointer;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      transition: all 0.15s ease;
+    }
+
+    .quiz-opt-btn:hover:not(:disabled) {
+      background: var(--bg-surface-2);
+      border-color: var(--accent-indigo);
+    }
+
+    .quiz-opt-btn.correct {
+      background: var(--accent-emerald-soft);
+      border-color: var(--accent-emerald);
+      color: #d1fae5;
+    }
+
+    .quiz-opt-btn.wrong {
+      background: var(--accent-rose-soft);
+      border-color: var(--accent-rose);
+      color: #ffe4e6;
+    }
+
+    .quiz-opt-letter {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      background: var(--bg-surface-3);
+      padding: 2px 7px;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    .quiz-feedback {
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      font-size: 13px;
+      border: 1px solid var(--border-subtle);
+      background: var(--bg-canvas);
+    }
+
+    /* =====================================================================
+       JSON MODAL DRAWER
+       ===================================================================== */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.78);
+      backdrop-filter: blur(4px);
+      z-index: 60;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-panel {
+      width: 100%;
+      max-width: 960px;
+      max-height: 86vh;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.75);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      background: var(--bg-surface-2);
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .json-pre {
+      padding: 18px 20px;
+      overflow: auto;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: #a7f3d0;
+      background: var(--bg-canvas);
+      flex: 1;
+      white-space: pre;
+    }
+
+    .toast-banner {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 70;
+      background: var(--bg-surface-3);
+      color: #ffffff;
+      border: 1px solid var(--accent-emerald);
+      padding: 10px 16px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 600;
+      box-shadow: var(--shadow-card);
+      display: none;
+    }
+
+    .toast-banner.visible {
+      display: block;
+    }
+
+    /* =====================================================================
+       RESPONSIVE BREAKPOINTS
+       ===================================================================== */
+    @media (max-width: 900px) {
+      .workspace-shell {
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        position: static;
+        height: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .topic-nav-list {
+        max-height: 220px;
+        overflow-y: auto;
+      }
+      .main-content {
+        padding: 16px;
+      }
+      .card-nav-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Application Header -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-group">
+        <div class="brand-badge">NBCE</div>
+        <div>
+          <div class="brand-title">Irene Gold Part 1 — Clean Study &amp; JSON App</div>
+          <div class="brand-subtitle">Annotation-Free Board Review • All 6 Subjects</div>
+        </div>
+      </div>
+
+      <div class="nav-controls">
+        <div class="tab-bar" role="tablist" aria-label="Study Modes">
+          <button id="tabNotes" class="tab-btn active" type="button">Notes</button>
+          <button id="tabFlashcards" class="tab-btn" type="button">Flashcards</button>
+          <button id="tabQuiz" class="tab-btn" type="button">Quiz</button>
+        </div>
+        <button id="openJsonModalBtn" class="btn" type="button">JSON</button>
+        <button id="downloadJsonBtn" class="btn btn-emerald" type="button">Download JSON</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Subject Pills Bar -->
+  <div class="subject-pills-bar" aria-label="Subjects">
+    <div id="subjectPillsContainer" class="subject-pills-inner"></div>
+  </div>
+
+  <!-- Main Sidebar + Workspace Shell -->
+  <div class="workspace-shell">
+    <aside class="sidebar" aria-label="Topic Navigation">
+      <div class="search-box-wrap">
+        <input
+          id="searchInput"
+          class="search-input"
+          type="search"
+          placeholder="Search all topics, tables, pearls..."
+          aria-label="Search topics and notes"
+        />
+        <button id="clearSearchBtn" class="clear-search-btn" type="button" title="Clear search" aria-label="Clear search">✕</button>
+      </div>
+
+      <div class="mastery-card">
+        <div class="mastery-top">
+          <span style="color: var(--text-muted); font-weight: 600;">Mastered Topics</span>
+          <span id="masteryCountText" style="font-family: var(--font-mono); font-weight: 700; color: #a5b4fc;">0 / 0</span>
+        </div>
+        <div class="mastery-track">
+          <div id="masteryBarFill" class="mastery-fill" style="width: 0%;"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sidebar-section-title">
+          <span>Topics in Subject</span>
+          <span id="sidebarTopicCount" style="font-family: var(--font-mono);">0</span>
+        </div>
+        <nav id="topicNavList" class="topic-nav-list"></nav>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <!-- TAB 1: NOTES -->
+      <section id="notesView" class="view-panel active" aria-label="Study Notes">
+        <div id="subjectBanner" class="subject-banner">
+          <div>
+            <div class="subject-meta-row">
+              <span id="bannerSubjectBadge" class="badge">General Anatomy</span>
+              <span id="bannerPagesTag" class="page-tag">Pages 1–14</span>
+            </div>
+            <h1 id="bannerSubjectTitle" class="subject-heading">General Anatomy</h1>
+            <p id="bannerSubjectDesc" class="subject-desc"></p>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button id="expandAllBtn" class="btn" type="button">Expand All</button>
+            <button id="collapseAllBtn" class="btn" type="button">Collapse All</button>
+          </div>
+        </div>
+
+        <div id="searchStatusBanner" class="search-banner" style="display: none;">
+          <span id="searchStatusText"></span>
+          <button id="resetSearchBtn" class="btn btn-primary" type="button" style="padding: 6px 12px;">Reset Search</button>
+        </div>
+
+        <div id="topicsContainer" class="topics-stack"></div>
+      </section>
+
+      <!-- TAB 2: FLASHCARDS -->
+      <section id="flashcardsView" class="view-panel" aria-label="Active Recall Flashcards">
+        <div class="mode-card-shell">
+          <div class="toolbar-panel">
+            <div>
+              <h2 style="font-size: 18px; font-weight: 700; color: #ffffff;">Active Recall Flashcards</h2>
+              <p style="font-size: 12.5px; color: var(--text-muted);">Generated directly from the clean NBCE Part 1 dataset.</p>
+            </div>
+            <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+              <select id="flashcardSubjectSelect" class="select-control" aria-label="Filter flashcards by subject">
+                <option value="ALL">All 6 Subjects</option>
+              </select>
+              <button id="shuffleCardsBtn" class="btn" type="button">Shuffle</button>
+            </div>
+          </div>
+
+          <div style="display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); padding: 0 4px;">
+            <span id="flashcardProgressLabel">Card 1 of 1</span>
+            <span id="flashcardTopicLabel" style="font-family: var(--font-mono); color: #a5b4fc;"></span>
+          </div>
+
+          <div id="flashcardStage" class="flashcard-stage" role="button" tabindex="0" aria-label="Flip flashcard">
+            <span id="flashcardSideLabel" class="card-side-label">Prompt</span>
+            <div id="flashcardMainText" class="card-main-text"></div>
+            <div id="flashcardSubText" class="card-sub-text"></div>
+          </div>
+
+          <div class="card-nav-row">
+            <button id="prevCardBtn" class="btn" type="button">← Previous</button>
+            <button id="flipCardBtn" class="btn btn-primary" type="button">Flip Card</button>
+            <button id="nextCardBtn" class="btn" type="button">Next →</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: QUIZ -->
+      <section id="quizView" class="view-panel" aria-label="Board Practice Quiz">
+        <div class="mode-card-shell">
+          <div class="toolbar-panel">
+            <div>
+              <h2 style="font-size: 18px; font-weight: 700; color: #ffffff;">NBCE Part 1 Practice Quiz</h2>
+              <p style="font-size: 12.5px; color: var(--text-muted);">Test high-yield associations across all six board subjects.</p>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+              <select id="quizSubjectSelect" class="select-control" aria-label="Filter quiz by subject">
+                <option value="ALL">All 6 Subjects</option>
+              </select>
+              <div style="font-family: var(--font-mono); font-size: 12.5px; background: var(--bg-canvas); border: 1px solid var(--border-subtle); padding: 7px 12px; border-radius: var(--radius-md);">
+                Score: <strong id="quizScoreText" style="color: #6ee7b7;">0</strong> / <span id="quizAnsweredText">0</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="quiz-card">
+            <div style="display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap;">
+              <span id="quizSubjectBadge" class="badge">Subject</span>
+              <span id="quizTopicMeta" class="page-tag">Topic</span>
+            </div>
+            <h3 id="quizQuestionHeading" style="font-size: 17px; font-weight: 700; color: #ffffff;"></h3>
+            <div id="quizOptionsContainer" class="quiz-options"></div>
+            <div id="quizFeedbackBox" class="quiz-feedback" style="display: none;"></div>
+            <div style="display: flex; justify-content: flex-end;">
+              <button id="nextQuizBtn" class="btn btn-primary" type="button">Next Question →</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Clean JSON Modal -->
+  <div id="jsonModal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="jsonModalTitle">
+    <div class="modal-panel">
+      <div class="modal-header">
+        <div>
+          <h2 id="jsonModalTitle" style="font-size: 16px; font-weight: 700; color: #ffffff;">NBCE_PART1_DATA — Clean Annotation-Free JSON</h2>
+          <p style="font-size: 12px; color: var(--text-muted);">Ready to copy or save as nbce_part1_clean_board_review.json</p>
+        </div>
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+          <button id="copyJsonBtn" class="btn" type="button">Copy JSON</button>
+          <button id="modalDownloadJsonBtn" class="btn btn-emerald" type="button">Download .json</button>
+          <button id="closeJsonModalBtn" class="btn btn-primary" type="button">Close</button>
+        </div>
+      </div>
+      <pre id="jsonModalPre" class="json-pre"></pre>
+    </div>
+  </div>
+
+  <!-- Toast Banner -->
+  <div id="toastBanner" class="toast-banner" role="status" aria-live="polite"></div>
+
+  <script>
+    /* =====================================================================
+       1. EMBEDDED ANNOTATION-FREE DATASET: NBCE_PART1_DATA
+       ===================================================================== */
+    const NBCE_PART1_DATA = {
+      metadata: {
+        appName: "Irene Gold Part 1 — Clean Study & JSON App",
+        source: "NBCE Part 1 Board Review PDF (Student Annotations Removed)",
+        exportFilename: "nbce_part1_clean_board_review.json",
+        subjectCount: 6
+      },
+      subjects: [
+        {
+          id: "general-anatomy",
+          name: "General Anatomy",
+          pages: "Pages 1–14",
+          description: "Histology, skin & fascia, head/neck triangles, thorax & mediastinum, abdomen & GI/urogenital organs, extremities, osteology, joints, and plexuses.",
+          topics: [
+            {
+              id: "ga-histology-skin-hyoid",
+              title: "Epithelium, Macrophages, Layers of Skin, Suprahyoid & Infrahyoid Muscles, Tissue & Collagen Types",
+              pageRef: "Pages 1–2",
+              tables: [
+                {
+                  headers: ["Category", "Clean Board Summary"],
+                  rows: [
+                    ["Epithelium", "Simple squamous (alveoli, endothelium, mesothelium, Bowman capsule); simple cuboidal (thyroid follicles, kidney tubules); simple columnar (GI lining, goblet/microvilli); pseudostratified ciliated columnar (respiratory tract, goblet cells); stratified squamous (keratinized epidermis vs. non-keratinized oral cavity, esophagus, vagina, anal canal); transitional/urothelium (bladder, ureters)"],
+                    ["Macrophages", "Kupffer cells (liver), microglia (CNS), Langerhans cells (epidermis), osteoclasts (bone), histiocytes (connective tissue), alveolar dust cells (lung), monocytes (blood)"],
+                    ["Layers of Skin", "Epidermis (superficial to deep): stratum corneum, lucidum (thick skin: palms/soles), granulosum (keratohyalin), spinosum (desmosomes/prickle cells), basale/germinativum (mitosis, melanocytes, Merkel cells). Dermis: papillary & reticular layers (Meissner corpuscle = light touch; Pacinian corpuscle = deep pressure/vibration)"],
+                    ["Suprahyoid & Infrahyoid Muscles", "Suprahyoid (elevate hyoid): digastric (anterior CN V3, posterior CN VII), stylohyoid (CN VII), mylohyoid (CN V3), geniohyoid (C1 via CN XII). Infrahyoid/strap (depress hyoid): sternohyoid, sternothyroid, omohyoid (ansa cervicalis C1–C3); thyrohyoid (C1 via CN XII)"],
+                    ["Tissue & Collagen Types", "Connective: areolar, adipose, reticular, dense regular/irregular, cartilage (hyaline, elastic, fibrocartilage), bone, blood. Muscle: skeletal (striated, multinucleated, voluntary), cardiac (striated, intercalated discs, involuntary), smooth (non-striated, involuntary). Collagen: Type I (bone, tendon, skin, scar/late repair), Type II (hyaline & elastic cartilage), Type III (reticular fibers, blood vessels, early granulation/wound healing), Type IV (basement membrane/basal lamina)"]
+                  ]
+                }
+              ],
+              keyPoints: [
+                "Stratified squamous keratinized epithelium protects dry skin surfaces; non-keratinized lines wet cavities exposed to mechanical abrasion.",
+                "Pacinian corpuscles respond rapidly to deep pressure and high-frequency vibration; Meissner corpuscles detect light touch in dermal papillae."
+              ]
+            },
+            {
+              id: "ga-tongue-tonsils-larynx-neck",
+              title: "Tongue & Taste Buds, Tonsils, Laryngeal Cartilages & Vocal Cords, Anatomical Triangles of Neck",
+              pageRef: "Pages 3–4",
+              tables: [
+                {
+                  headers: ["Structure / Region", "Clean Board Summary"],
+                  rows: [
+                    ["Tongue & Taste Buds", "Papillae: filiform (most numerous, no taste buds), fungiform, foliate, circumvallate (sulcus terminalis). Anterior 2/3 general sensation = lingual n. (CN V3); anterior 2/3 taste = chorda tympani (CN VII). Posterior 1/3 sensation & taste = glossopharyngeal n. (CN IX). Root/epiglottis = vagus n. (CN X). Motor = CN XII except palatoglossus (CN X)"],
+                    ["Tonsils (Waldeyer's Ring)", "Pharyngeal/adenoid tonsil (nasopharynx roof), tubal tonsils (around auditory tube openings), palatine tonsils (palatoglossal & palatopharyngeal arches), lingual tonsil (posterior tongue base)"],
+                    ["Laryngeal Cartilages & Vocal Cords", "Unpaired: thyroid (laryngeal prominence at C4–C5), cricoid (complete signet ring at C6), epiglottis (elastic cartilage). Paired: arytenoid, corniculate, cuneiform. Posterior cricoarytenoid ABDUCTS vocal cords (only abductor); cricothyroid tenses vocal cords (external laryngeal n. CN X); intrinsic adductors/tensors innervated by recurrent laryngeal n. (CN X)"],
+                    ["Anatomical Triangles of Neck", "Anterior triangle (midline, inferior mandible, anterior SCM) subdivided into submandibular/digastric, submental, carotid, and muscular triangles. Posterior triangle (posterior SCM, anterior trapezius, middle 1/3 clavicle) contains CN XI, brachial plexus trunks, subclavian vessels, external jugular vein"]
+                  ]
+                }
+              ],
+              keyPoints: [
+                "Damage to the recurrent laryngeal nerve can impair vocal fold adduction/abduction and alter phonation; the cricothyroid muscle is uniquely supplied by the external branch of the superior laryngeal nerve."
+              ]
+            },
+            {
+              id: "ga-thorax-lungs-heart-abdomen",
+              title: "Thoracic Inlet/Outlet & Diaphragm & Peritoneum & Retroperitoneal Organs, Lungs & Trachea & Pleura, Mediastinum & Heart Chambers/Valves/Laryngeal Nerves, Heart Arteries/Veins & Abdominal Regions",
+              pageRef: "Pages 5–8",
+              tables: [
+                {
+                  headers: ["Region / Organ System", "Clean Board Summary"],
+                  rows: [
+                    ["Thoracic Inlet/Outlet, Diaphragm, Peritoneum & Retroperitoneal", "Inlet: T1, 1st ribs/cartilages, manubrium. Outlet: T12, ribs 11–12, costal margins, xiphoid. Diaphragm openings: IVC foramen at T8 (central tendon, R phrenic), esophageal hiatus at T10 (esophagus, vagal trunks), aortic hiatus at T12 (aorta, thoracic duct, azygos). Retroperitoneal (SAD PUCKER): suprarenal glands, aorta/IVC, duodenum (2nd–4th), pancreas (head/neck/body), ureters, colon (ascending/descending), kidneys, esophagus (lower), rectum"],
+                    ["Lungs, Trachea & Pleura", "Trachea runs C6 to sternal angle (T4/T5) with C-shaped hyaline cartilage rings. Right lung: 3 lobes, horizontal & oblique fissures, shorter/wider/more vertical bronchus. Left lung: 2 lobes, oblique fissure, cardiac notch & lingula. Parietal pleura lines wall/diaphragm/mediastinum; visceral pleura covers lung; costodiaphragmatic recess is lowest pleural space"],
+                    ["Mediastinum, Heart Chambers, Valves & Laryngeal Nerves", "Superior & inferior mediastinum (anterior, middle, posterior). Right atrium receives SVC, IVC, coronary sinus; tricuspid valve separates RA/RV. Right ventricle pumps to pulmonary trunk via pulmonary semilunar valve. Left atrium receives 4 pulmonary veins; bicuspid/mitral valve separates LA/LV. Left ventricle pumps to aorta via aortic semilunar valve. Left recurrent laryngeal n. loops under aortic arch; right loops under right subclavian a."],
+                    ["Heart Arteries/Veins & Abdominal Regions", "Left coronary artery → LAD (anterior IV sulcus) & circumflex; right coronary artery → marginal & posterior interventricular (PDA). Cardiac veins drain via great, middle, and small cardiac veins into coronary sinus → RA. 9 Abdominopelvic regions: R/L hypochondriac, epigastric, R/L lumbar, umbilical, R/L iliac/inguinal, hypogastric"]
+                  ]
+                }
+              ],
+              keyPoints: [
+                "Phrenic nerve (C3–C5) provides motor innervation to the diaphragm.",
+                "Left recurrent laryngeal nerve hooks beneath the aortic arch adjacent to the ligamentum arteriosum, making it vulnerable in thoracic/aortic pathology."
+              ]
+            },
+            {
+              id: "ga-gi-portal-urogenital-inguinal",
+              title: "Stomach/Liver/Bile Flow/Other Ducts, Portal Venous Flow/Pancreas/Spleen/Small & Large Intestine, Abdomen Venous Drainage/Fetal Shunts/Lymphatics/GI Embryology, Male & Female Anatomy & Inguinal Canal",
+              pageRef: "Pages 8–10",
+              tables: [
+                {
+                  headers: ["GI / Urogenital System", "Clean Board Summary"],
+                  rows: [
+                    ["Stomach, Liver, Bile Flow & Other Ducts", "Stomach: cardia, fundus, body, pylorus; greater & lesser curvatures. Liver: falciform, coronary, triangular ligaments; ligamentum teres (umbilical vein remnant) & ligamentum venosum (ductus venosus remnant). Bile flow: hepatocytes → bile canaliculi → intrahepatic ducts → R/L hepatic ducts → common hepatic duct (+ cystic duct from gallbladder) → common bile duct → ampulla of Vater (sphincter of Oddi) into 2nd duodenum. Ducts: parotid (Stensen), submandibular (Wharton), sublingual (Bartholin), main pancreatic (Wirsung), accessory pancreatic (Santorini)"],
+                    ["Portal Venous Flow, Pancreas, Spleen & Intestines", "Portal vein formed by superior mesenteric vein + splenic vein (receives IMV), carrying nutrient-rich blood to liver sinusoids. Pancreas: exocrine acini & endocrine islets of Langerhans. Spleen: ribs 9–11 left side, red & white pulp, intraperitoneal. Small intestine: duodenum, jejunum, ileum (Peyer patches). Large intestine: cecum/appendix, ascending/transverse/descending/sigmoid colon, rectum, anal canal (pectinate line)"],
+                    ["Abdomen Veins, Fetal Shunts, Lymphatics & GI Embryology", "Veins: IVC, azygos (right), hemiazygos & accessory hemiazygos (left), portal-systemic anastomoses (esophageal, rectal, paraumbilical). Fetal shunts: ductus venosus (bypasses liver), foramen ovale (RA → LA), ductus arteriosus (pulmonary artery → aorta). Lymphatics: cisterna chyli → thoracic duct (drains body below diaphragm + left head/neck/upper limb to left venous angle); right lymphatic duct drains right head/neck/upper limb/thorax. Gut tube: foregut (celiac trunk), midgut (SMA), hindgut (IMA)"],
+                    ["Male & Female Anatomy & Inguinal Canal", "Female: ovaries, uterine/fallopian tubes (infundibulum, ampulla, isthmus), uterus, vagina, broad ligament. Male: testes, epididymis, ductus deferens, seminal vesicles, prostate, bulbourethral glands, penis. Inguinal canal: deep ring (transversalis fascia, lateral to inferior epigastric vessels) to superficial ring (external oblique aponeurosis); indirect hernia traverses canal lateral to inferior epigastric vessels, direct hernia bulges medial to inferior epigastric vessels through Hesselbach triangle"]
+                  ]
+                }
+              ],
+              keyPoints: [
+                "Left testicular/ovarian vein drains into the left renal vein; right testicular/ovarian vein drains directly into the IVC."
+              ]
+            },
+            {
+              id: "ga-extremity-muscles-spaces-vessels",
+              title: "Rotator Cuff & Neck/Chest/Back Muscles, Arm & Forearm Muscles, Shoulder/Cubital Fossa/Snuffbox/Carpal Tunnel/Axilla, Posterior Forearm & Hand Muscles, Anterior/Lateral/Medial Thigh Muscles, Posterior Thigh/Sciatic Foramen/Femoral Triangle, Leg & Foot Muscles, Upper & Lower Extremity Arteries & Veins",
+              pageRef: "Pages 11–12",
+              tables: [
+                {
+                  headers: ["Extremity Region", "Clean Board Summary"],
+                  rows: [
+                    ["Rotator Cuff & Neck/Chest/Back Muscles", "Rotator cuff (SITS): supraspinatus (suprascapular n., initiates abduction 0–15°), infraspinatus (suprascapular n., external rotation), teres minor (axillary n., external rotation), subscapularis (upper/lower subscapular nn., internal rotation). Neck/chest/back: SCM, scalenes, pectoralis major/minor, serratus anterior, trapezius, latissimus dorsi, rhomboids, levator scapulae, erector spinae"],
+                    ["Arm & Forearm Muscles", "Anterior arm (musculocutaneous n.): biceps brachii, brachialis, coracobrachialis. Posterior arm (radial n.): triceps brachii, anconeus. Anterior forearm (mostly median n.; FCU & medial FDP = ulnar n.): pronator teres, FCR, palmaris longus, FDS, FDP, FPL, pronator quadratus"],
+                    ["Shoulder, Cubital Fossa, Snuffbox, Carpal Tunnel & Axilla", "Quadrangular space (teres minor, teres major, long head triceps, surgical neck humerus → axillary n., posterior circumflex humeral a.). Cubital fossa: lateral brachioradialis, medial pronator teres; biceps tendon, brachial a., median n. Snuffbox: EPL medial, EPB + APL lateral; radial a.; scaphoid/trapezium floor. Carpal tunnel: 4 FDS, 4 FDP, 1 FPL tendons + median n. Axilla: apex, base, anterior/posterior/medial/lateral walls; brachial plexus & axillary vessels"],
+                    ["Posterior Forearm & Hand Muscles", "Posterior forearm (radial n. / posterior interosseous n.): brachioradialis, ECRL/ECRB, EDC, EDM, ECU, supinator, APL, EPB, EPL, EI. Hand: thenar (median n.), hypothenar (ulnar n.), lumbricals (1–2 median, 3–4 ulnar), palmar interossei (PAD = adduct), dorsal interossei (DAB = abduct)"],
+                    ["Anterior, Lateral & Medial Thigh Muscles", "Anterior thigh (femoral n.): quadriceps femoris (rectus femoris, vastus lateralis/medialis/intermedius), sartorius, iliopsoas, pectineus. Lateral thigh (superior gluteal n.): tensor fasciae latae, gluteus medius & minimus (abductors). Medial thigh (obturator n.): adductor longus/brevis/magnus, gracilis, obturator externus"],
+                    ["Posterior Thigh, Sciatic Foramen & Femoral Triangle", "Posterior thigh/hamstrings (sciatic n. — tibial division; short head biceps femoris = fibular division): semitendinosus, semimembranosus, biceps femoris. Greater sciatic foramen: piriformis divides suprapiriform & infrapiriform spaces. Femoral triangle (inguinal ligament, sartorius, adductor longus): NAVEL lateral to medial (Nerve, Artery, Vein, Empty space, Lymphatics)"],
+                    ["Leg & Foot Muscles", "Anterior leg (deep fibular n. — dorsiflexion): tibialis anterior, EHL, EDL, fibularis tertius. Lateral leg (superficial fibular n. — eversion): fibularis longus & brevis. Posterior leg (tibial n. — plantarflexion): superficial (gastrocnemius, soleus, plantaris via calcaneal tendon) & deep (popliteus, FHL, FDL, tibialis posterior). Foot: dorsal & plantar layers"],
+                    ["Upper & Lower Extremity Arteries & Veins", "Upper limb arteries: subclavian → axillary → brachial → radial & ulnar → palmar arches; veins: cephalic (lateral), basilic (medial), median cubital. Lower limb arteries: external iliac → femoral → popliteal → anterior tibial (→ dorsalis pedis) & posterior tibial (→ fibular, medial/lateral plantar); veins: great saphenous (medial) & small saphenous (lateral)"]
+                  ]
+                }
+              ]
+            },
+            {
+              id: "ga-osteology-joints-plexuses",
+              title: "Skeletal Terms & Skull Bones/Sutures/Fontanelles, Joint Classification & Humerus, Clavicle/Scapula/Shoulder Ligaments, Radius/Ulna/Hand, Pelvic Girdle & Hip Ligaments, Femur/Tibia/Fibula, Knee & Ankle Ligaments, Brachial/Cervical/Lumbosacral Plexuses",
+              pageRef: "Pages 12–14",
+              tables: [
+                {
+                  headers: ["Osteology / Joint / Plexus Group", "Clean Board Summary"],
+                  rows: [
+                    ["Skeletal Terms & Skull Bones/Sutures/Fontanelles", "Diaphysis, epiphysis, metaphysis, epiphyseal plate, periosteum, endosteum, Haversian system/osteon. Cranial bones: frontal, 2 parietal, 2 temporal, occipital, sphenoid, ethmoid. Sutures: coronal, sagittal, lambdoid, squamous. Fontanelles: anterior (bregma, closes ~18–24 mos), posterior (lambda, closes ~1–3 mos), sphenoidal, mastoid"],
+                    ["Joint Classification & Humerus", "Synarthrosis (fibrous/cartilaginous immovable), amphiarthrosis (slightly movable: symphysis, syndesmosis), diarthrosis (synovial freely movable: hinge, pivot, condyloid, saddle, gliding, ball-and-socket). Humerus: head, anatomical/surgical necks, greater/lesser tubercles, intertubercular sulcus, deltoid tuberosity, radial groove, capitulum, trochlea, medial/lateral epicondyles"],
+                    ["Clavicle, Scapula & Shoulder Ligaments", "Clavicle (first bone to ossify, intramembranous, S-shaped). Scapula: spine, acromion, coracoid process, glenoid cavity, supraspinous/infraspinous/subscapular fossae. Shoulder ligaments: coracohumeral, glenohumeral, coracoacromial, acromioclavicular, coracoclavicular (conoid & trapezoid)"],
+                    ["Radius, Ulna & Hand", "Radius: lateral in anatomical position, head, neck, radial tuberosity, styloid process. Ulna: medial, olecranon, coronoid process, trochlear/radial notches, head/styloid process. Carpals (proximal lateral→medial): scaphoid, lunate, triquetrum, pisiform; (distal lateral→medial): trapezium, trapezoid, capitate, hamate"],
+                    ["Pelvic Girdle & Hip Ligaments", "Ilium, ischium, pubis fuse at acetabulum; greater/lesser sciatic notches, obturator foramen, pubic symphysis. Hip ligaments: iliofemoral (Y of Bigelow — strongest), pubofemoral, ischiofemoral, ligamentum teres (fovea capitis)"],
+                    ["Femur, Tibia & Fibula", "Femur: head, neck, greater/lesser trochanters, linea aspera, medial/lateral condyles & epicondyles, patellar surface. Tibia: medial weight-bearing bone, medial/lateral condyles, tibial tuberosity, anterior crest, medial malleolus. Fibula: lateral non-weight-bearing bone, head, neck, lateral malleolus"],
+                    ["Knee & Ankle Ligaments", "Knee: ACL (resists anterior tibial translation), PCL (resists posterior tibial translation), MCL (attached to medial meniscus), LCL (cord-like, separate from lateral meniscus), medial & lateral menisci. Ankle: medial deltoid ligament; lateral ATFL (most frequently injured), CFL, PTFL; plantar calcaneonavicular (spring) ligament"],
+                    ["Brachial, Cervical & Lumbosacral Plexuses", "Cervical plexus (C1–C4): phrenic n. (C3–C5), ansa cervicalis, lesser occipital, great auricular, transverse cervical, supraclavicular. Brachial plexus (C5–T1): roots → trunks (superior, middle, inferior) → divisions → cords (lateral, posterior, medial) → terminal branches (musculocutaneous, axillary, median, radial, ulnar). Lumbosacral plexus (L1–S4): femoral n. (L2–L4), obturator n. (L2–L4), sciatic n. (L4–S3 → tibial & common fibular), pudendal n. (S2–S4)"]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: "spinal-anatomy",
+          name: "Spinal Anatomy",
+          pages: "Pages 1–14",
+          description: "Embryology, pharyngeal arches, cranial nerves, CNS/tracts/ANS, intracranial circulation & hemorrhages, special senses, suboccipital region, vertebral landmarks, and nerve roots.",
+          topics: [
+            {
+              id: "sa-embryology-pharyngeal-arches",
+              title: "Embryological Germ Layers & Derivatives, CNS Neural Tube Pathologies & B9, Chondrification & Ossification, GI Embryology, Brain Embryology & CSF Flow, Pharyngeal Arches",
+              pageRef: "Pages 1–4",
+              tables: [
+                {
+                  headers: ["Embryology Topic", "Clean Board Summary"],
+                  rows: [
+                    ["Germ Layers & Derivatives", "Ectoderm: epidermis, CNS & PNS, lens/retina, neural crest (DRG, sympathetic ganglia, adrenal medulla, melanocytes, pharyngeal arch cartilage). Mesoderm: somites (sclerotome, myotome, dermatome), urogenital, heart/blood vessels, bone/cartilage/muscle. Endoderm: GI/respiratory epithelial linings, liver, pancreas, thyroid, parathyroids"],
+                    ["CNS Neural Tube Pathologies & B9", "Spina bifida occulta, meningocele, myelomeningocele, encephalocele, anencephaly, Arnold-Chiari malformation. Adequate maternal folate/vitamin B9 prior to conception reduces neural tube defect risk"],
+                    ["Chondrification & Ossification", "Intramembranous ossification: direct mesenchymal differentiation into bone (flat skull bones, clavicle, mandible). Endochondral ossification: hyaline cartilage model replaced by bone (long bones, vertebrae, cranial base)"],
+                    ["GI Embryology", "Foregut (pharynx to proximal duodenum, liver, gallbladder, pancreas), midgut (distal duodenum to proximal 2/3 transverse colon), hindgut (distal 1/3 transverse colon to upper anal canal)"],
+                    ["Brain Embryology & CSF Flow", "Primary vesicles: prosencephalon (telencephalon, diencephalon), mesencephalon, rhombencephalon (metencephalon, myelencephalon). CSF flow: lateral ventricles → interventricular foramina (Monro) → 3rd ventricle → cerebral aqueduct (Sylvius) → 4th ventricle → foramina of Luschka & Magendie → subarachnoid space → arachnoid granulations → dural venous sinuses"],
+                    ["Pharyngeal Arches", "Arch 1 (CN V3): muscles of mastication, mylohyoid, anterior digastric, tensor tympani/veli palatini; malleus & incus. Arch 2 (CN VII): facial expression, stapedius, stylohyoid, posterior digastric; stapes, styloid process, lesser horn/upper hyoid. Arch 3 (CN IX): stylopharyngeus; greater horn/lower hyoid. Arches 4 & 6 (CN X): pharyngeal/laryngeal muscles; laryngeal cartilages"]
+                  ]
+                }
+              ]
+            },
+            {
+              id: "sa-cranial-nerves-cns-tracts-ans",
+              title: "Cranial Nerves & Muscles of Mastication/Facial Expression, Nervous System Cells/Neurons/Action Potential/UMN vs LMN, Brain Overview/Cerebrum/Cerebellum/Thalamus/Hypothalamus/Basal Ganglia, Descending & Ascending Tracts & Receptors, Autonomic Nervous System & Neurotransmitters",
+              pageRef: "Pages 5–10",
+              tables: [
+                {
+                  headers: ["Neuroanatomy Topic", "Clean Board Summary"],
+                  rows: [
+                    ["Cranial Nerves & Mastication/Facial Muscles", "CN I (smell), CN II (vision), CN III (SR, IR, MR, IO, levator palpebrae, pupillary constriction/accommodation), CN IV (superior oblique), CN V (V1/V2/V3; mastication = masseter, temporalis, medial/lateral pterygoids), CN VI (lateral rectus), CN VII (facial expression, stapedius, ant. 2/3 taste, lacrimal/submandibular/sublingual), CN VIII (hearing & balance), CN IX (stylopharyngeus, post. 1/3 taste/sensation, carotid sinus/body, parotid), CN X (pharynx/larynx/viscera), CN XI (SCM, trapezius), CN XII (tongue)"],
+                    ["Cells, Action Potential & UMN vs. LMN", "Astrocytes (BBB, K+ buffering), oligodendrocytes (CNS myelin), Schwann cells (PNS myelin), microglia (immune), ependymal cells (CSF). UMN lesions: spasticity, hyperreflexia, Babinski sign, disuse atrophy. LMN lesions: flaccidity, hyporeflexia/areflexia, fasciculations, severe atrophy"],
+                    ["Brain Regions", "Cerebrum (lobes, sensory/motor/association areas), cerebellum (coordination, balance, muscle tone), thalamus (sensory relay except olfaction), hypothalamus (autonomic, endocrine, temperature, appetite), basal ganglia (caudate, putamen, globus pallidus — motor initiation/modulation)"],
+                    ["Descending & Ascending Tracts & Receptors", "Ascending: dorsal column-medial lemniscus (fine touch, vibration, proprioception), spinothalamic (pain, temperature, crude touch), spinocerebellar (unconscious proprioception). Descending: lateral & anterior corticospinal (voluntary motor), rubrospinal, vestibulospinal, reticulospinal, tectospinal"],
+                    ["Autonomic Nervous System & Neurotransmitters", "Sympathetic (thoracolumbar T1–L2): preganglionic releases ACh (nicotinic), postganglionic releases NE (adrenergic; sweat glands use ACh on muscarinic). Parasympathetic (craniosacral CN III, VII, IX, X & S2–S4): preganglionic & postganglionic release ACh (nicotinic & muscarinic)"]
+                  ]
+                }
+              ]
+            },
+            {
+              id: "sa-vessels-senses-suboccipital-vertebrae",
+              title: "Skull Arterial Supply/Circle of Willis/Venous Sinuses/Hemorrhages, Olfactory/Auditory/Ear & Eye/Nose Drainage, Optic Pathway & Suboccipital Muscles/Triangle, Vertebral Landmarks/Upper Cervical Ligaments/Spinal Ligaments/Enlargements/Dural Sac, IVF Boundaries/Facet Directions/Sacrum/Sacralization vs Lumbarization/Spinal Curves/Ribs/Atypical T-Vertebrae, Selected Nerve Roots",
+              pageRef: "Pages 10–14",
+              tables: [
+                {
+                  headers: ["Spinal & Cranial Topic", "Clean Board Summary"],
+                  rows: [
+                    ["Arterial Supply, Circle of Willis, Sinuses & Hemorrhages", "Circle of Willis: anterior/middle/posterior cerebral aa., anterior/posterior communicating aa., internal carotid & basilar contributions. Epidural hematoma (middle meningeal a., biconvex, lucid interval), subdural hematoma (bridging veins, crescent), subarachnoid hemorrhage (berry aneurysm/AVM)"],
+                    ["Special Senses, Ear/Eye/Nose & Optic Pathway", "Ear: external (auricle, EAM to tympanic membrane), middle (malleus, incus, stapes, pharyngotympanic tube), inner (cochlea/hearing, semicircular canals & vestibule/balance). Eye: aqueous humor (ciliary body → posterior/anterior chambers → trabecular meshwork/canal of Schlemm). Optic pathway: retina → optic n. → chiasm (nasal fibers cross) → optic tract → LGN → optic radiations → calcarine cortex"],
+                    ["Suboccipital Muscles & Triangle", "Suboccipital muscles (suboccipital n., C1 dorsal ramus): rectus capitis posterior major & minor, obliquus capitis superior & inferior. Suboccipital triangle: RCPM, OCS, OCI; contains vertebral a. & suboccipital n. Greater occipital n. = C2 dorsal ramus"],
+                    ["Vertebral Landmarks, Ligaments, Enlargements & Dural Sac", "Cervical/thoracic/lumbar landmarks; ALL (limits extension), PLL (limits flexion), ligamentum flavum (laminae), interspinous/supraspinous, nuchal ligament, transverse ligament of atlas, alar ligaments. Cervical & lumbar cord enlargements; spinal cord typically ends around L1–L2 (conus medullaris); dural sac ends around S2"],
+                    ["IVF, Facets, Sacrum, Transitions, Curves, Ribs & Atypical T-Vertebrae", "IVF: superior/inferior pedicles, vertebral body/IVD anteriorly, zygapophyseal joint posteriorly. Facets: cervical (~45°), thoracic (~60° coronal), lumbar (~90° sagittal). Sacralization vs. lumbarization. Primary curves (thoracic, sacral/pelvic kyphoses) vs. secondary curves (cervical, lumbar lordoses). Typical vs. atypical ribs (1, 2, 10–12) & atypical thoracic vertebrae (T1, T9–T12)"],
+                    ["Selected Nerve Roots", "Segmental motor, reflex, and dermatomal/myotomal correlations across cervical, thoracic, lumbosacral, and coccygeal nerve roots"]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: "physiology",
+          name: "Physiology",
+          pages: "Pages 1–13",
+          description: "Cardiovascular mechanics & ECG, vascular & respiratory physiology, acid-base & renal/RAAS, endocrine & reproductive physiology, GI digestion, muscle contraction, and neurophysiology.",
+          topics: [
+            {
+              id: "phys-cardio-vessels-respiratory",
+              title: "Cardiac Cycle/Blood Flow/Volumes/Heart Sounds, Cardiac Action Potential/ECG/Murmurs, Heart & Blood Vessel Pathologies/CHF/Alcohol, Laws of Physiology/Bohr & Haldane Effects/Lung Volumes/Respiratory Centers & Chemoreceptors, Lung Histology/Lung Pressures/Chloride Shift/Acid-Base Balance",
+              pageRef: "Pages 1–5",
+              tables: [
+                {
+                  headers: ["Cardiopulmonary Topic", "Clean Board Summary"],
+                  rows: [
+                    ["Cardiac Cycle, Blood Flow, Volumes & Heart Sounds", "CO = HR × SV; MAP = CO × TPR (or DBP + 1/3 PP). SV = EDV − ESV. S1 (AV valve closure), S2 (semilunar valve closure), S3 (rapid early ventricular filling), S4 (atrial contraction against stiff ventricle)"],
+                    ["Cardiac Action Potential, ECG & Murmurs", "Ventricular AP phases 0 (Na+ influx), 1 (K+ efflux), 2 (Ca2+ influx / K+ efflux plateau), 3 (K+ efflux repolarization), 4 (resting potential). ECG: P (atrial depolarization), PR interval (AV delay), QRS (ventricular depolarization), ST segment, T wave (ventricular repolarization). Systolic vs. diastolic murmurs"],
+                    ["Heart/Vessel Pathologies, CHF & Alcohol", "Left-sided CHF (pulmonary congestion/edema) vs. right-sided CHF (systemic venous congestion, JVD, hepatomegaly, peripheral edema). Chronic alcohol effects on liver, GI mucosa, and nervous system (e.g., thiamine deficiency)"],
+                    ["Laws, Bohr/Haldane, Lung Volumes & Respiratory Centers", "Poiseuille resistance (∝ 1/r⁴), Frank-Starling preload-stroke volume relationship, Laplace tension (T = Pr or Pr/2). Bohr effect (right shift of O2-Hb curve aids O2 unloading in tissues); Haldane effect (deoxygenated Hb binds CO2/H+ more readily). Lung volumes (TV, IRV, ERV, RV) & capacities (VC, FRC, TLC). Medullary (DRG/VRG) & pontine (pneumotaxic/apneustic) centers; central & peripheral chemoreceptors"],
+                    ["Lung Histology, Pressures, Chloride Shift & Acid-Base", "Type I (gas exchange) & Type II (surfactant) alveolar cells; pleural/alveolar/transpulmonary pressures. Chloride shift (HCO3− exits RBC for Cl− entry in systemic capillaries). Respiratory & metabolic acidosis/alkalosis and compensatory mechanisms"]
+                  ]
+                }
+              ]
+            },
+            {
+              id: "phys-renal-endocrine-repro-gi",
+              title: "Blood Fluid Volume/RAAS/Aldosterone/ADH, Adrenal Gland/Kidney Anatomy/Urine Pathway/Male Sexual Function, Pituitary Gland/Anterior & Posterior Pituitary & Pars Intermedia, Calcium Balance/PTH & Calcitonin/Sex Characteristics/Menstrual Cycle/Spermatogenesis, Digestion/Salivary/Gastric/Pancreatic/Biliary/Enteric Enzymes",
+              pageRef: "Pages 5–10",
+              tables: [
+                {
+                  headers: ["Renal, Endocrine & GI Topic", "Clean Board Summary"],
+                  rows: [
+                    ["Blood Fluid Volume, RAAS, Aldosterone & ADH", "Renin (JG cells) converts angiotensinogen → angiotensin I → ACE → angiotensin II (vasoconstriction, aldosterone release). Aldosterone (zona glomerulosa) increases Na+ reabsorption & K+/H+ secretion. ADH (posterior pituitary) increases collecting duct water permeability via aquaporins"],
+                    ["Adrenal, Kidney Anatomy, Urine Pathway & Male Function", "Adrenal cortex: GFR (glomerulosa/mineralocorticoids, fasciculata/glucocorticoids, reticularis/androgens); medulla: catecholamines. Urine pathway: nephron/collecting duct → minor/major calyces → renal pelvis → ureter → bladder → urethra. Male sexual response integrates vascular, neural, and endocrine controls"],
+                    ["Pituitary Gland (Anterior, Posterior & Pars Intermedia)", "Anterior pituitary: GH, PRL, TSH, ACTH, LH, FSH. Posterior pituitary: stores/releases hypothalamic ADH and oxytocin. Pars intermedia: MSH"],
+                    ["Calcium Balance, PTH/Calcitonin, Sex & Reproductive Cycles", "PTH increases serum Ca2+ and lowers serum phosphate; calcitonin lowers serum Ca2+; vitamin D enhances intestinal Ca2+ and phosphate absorption. Menstrual cycle (follicular/estrogen, ovulation/LH surge, luteal/progesterone) & spermatogenesis (Sertoli & Leydig cells)"],
+                    ["Digestion & Enzymes", "Salivary (α-amylase, lingual lipase), gastric (pepsinogen → pepsin, HCl, intrinsic factor, gastric lipase), pancreatic (amylase, trypsin/chymotrypsin/carboxypeptidase, lipase, nucleases), biliary (bile salts emulsify lipids), enteric brush-border enzymes (disaccharidases, peptidases)"]
+                  ]
+                }
+              ]
+            },
+            {
+              id: "phys-muscle-neuro-transport",
+              title: "Skeletal Muscle Sarcomere/Fiber Types/Contractions/Muscle Spindles, Skeletal & Smooth Muscle Contraction, Muscle Pathologies/Edema/Brain Waves/Membrane Transport",
+              pageRef: "Pages 11–13",
+              tables: [
+                {
+                  headers: ["Muscle & Neurophysiology Topic", "Clean Board Summary"],
+                  rows: [
+                    ["Sarcomere, Fiber Types, Contractions & Muscle Spindles", "A-band (myosin length, constant), I-band (actin only, shortens), H-zone (myosin without overlap, shortens), Z-disc, M-line. Type I (slow oxidative), Type IIa (fast oxidative-glycolytic), Type IIb/IIx (fast glycolytic). Isotonic vs. isometric contractions. Muscle spindles (intrafusal bag/chain fibers, Ia/II afferents, gamma motor neurons)"],
+                    ["Skeletal & Smooth Muscle Contraction", "Skeletal: ACh at NMJ → sarcolemma/T-tubule depolarization → SR Ca2+ release → Ca2+ binds troponin C → tropomyosin shifts → actin-myosin cross-bridge cycling. Smooth: Ca2+ binds calmodulin → activates MLCK → phosphorylates myosin light chain"],
+                    ["Muscle Pathologies, Edema, Brain Waves & Transport", "NMJ/muscle disorders (myasthenia gravis, botulinum, tetanus, muscular dystrophies). Edema mechanisms (↑ hydrostatic pressure, ↓ oncotic pressure, ↑ permeability, lymphatic obstruction). EEG waves (alpha, beta, theta, delta, gamma). Membrane transport (simple/facilitated diffusion, primary/secondary active transport, osmosis)"]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: "biochemistry",
+          name: "Biochemistry",
+          pages: "Pages 1–23",
+          description: "Metabolic states, vitamins & minerals, amino acids & enzymes, carbohydrates & lipids, nucleic acids & gene expression, and central energy/nitrogen pathways.",
+          topics: [
+            {
+              id: "biochem-states-vitamins-minerals",
+              title: "Overview & Metabolic States, Water-Soluble Vitamins, Fat-Soluble Vitamins & Minerals, Methylation Cycle/Vitamin D Synthesis/Iron Absorption",
+              pageRef: "Pages 1–3",
+              tables: [
+                {
+                  headers: ["Biochemistry Topic", "Clean Board Summary"],
+                  rows: [
+                    ["Overview & Metabolic States", "Well-fed (absorptive) state favors anabolism (glycogenesis, lipogenesis, protein synthesis) driven by insulin; fasting (postabsorptive) state favors catabolism/gluconeogenesis driven by glucagon, epinephrine, and cortisol"],
+                    ["Water-Soluble Vitamins", "B1 (thiamine/TPP — PDH, α-KGDH, transketolase; beriberi/Wernicke-Korsakoff), B2 (riboflavin/FAD/FMN), B3 (niacin/NAD+/NADP+; pellagra), B5 (pantothenic acid/CoA), B6 (pyridoxine/PLP — transamination, decarboxylation, heme), B7 (biotin — carboxylases), B9 (folate/THF — 1-carbon transfer), B12 (cobalamin — methionine synthase, methylmalonyl-CoA mutase; intrinsic factor needed), Vitamin C (ascorbate — collagen hydroxylation, iron absorption; scurvy)"],
+                    ["Fat-Soluble Vitamins & Minerals", "Vitamins A (vision/epithelia), D (Ca2+/PO4³− balance; rickets/osteomalacia), E (antioxidant for membranes), K (clotting factors II, VII, IX, X, protein C & S). Key minerals: Fe, Ca, Mg, Zn, Cu, Se, I, Cr, F"],
+                    ["Methylation Cycle, Vitamin D & Iron Absorption", "Methionine → SAM → SAH → homocysteine (remethylated via B12 & folate). Vitamin D: 7-dehydrocholesterol (skin UVB) → D3 → 25-(OH)D3 (liver) → 1,25-(OH)2D3 (kidney). Iron: absorbed in duodenum primarily as Fe2+ (divalent metal transporter), stored as ferritin, transported on transferrin"]
+                  ]
+                }
+              ]
+            },
+            {
+              id: "biochem-aa-proteins-enzymes-carbs-lipids",
+              title: "20 Amino Acids & Classification, Amino Acid Classification/Complete & Incomplete Proteins, Glucogenic/Ketogenic/Acidic/Basic Amino Acids & Amino Acid Derivatives/Glutathione & Selenium, Protein Structures/Types/Enzymes, Allosteric Enzymes/Km & Vmax/Inhibition/Gibbs Free Energy, Carbohydrates/Monosaccharides/Disaccharides/Polysaccharides, GAGs & Lipids/Saturated vs Unsaturated/Essential Fatty Acids, Steroids/Cholesterol Synthesis/Lipoproteins",
+              pageRef: "Pages 4–7",
+              tables: [
+                {
+                  headers: ["Macromolecule / Enzyme Topic", "Clean Board Summary"],
+                  rows: [
+                    ["Amino Acids, Proteins & Derivatives", "20 standard L-α-amino acids; essential amino acids (PVT TIM HaLL). Purely ketogenic: leucine & lysine; glucogenic/ketogenic: Ile, Phe, Trp, Tyr; remaining glucogenic. Acidic (Asp, Glu) & basic (His, Lys, Arg). Derivatives: Phe/Tyr → catecholamines/thyroid/melanin; Trp → serotonin/melatonin/niacin; His → histamine; Gly/Arg/Met → creatine. Glutathione (Glu-Cys-Gly) & selenium-dependent glutathione peroxidase"],
+                    ["Protein Structure, Enzymes, Kinetics & Thermodynamics", "Primary, secondary (α-helix, β-sheet), tertiary, quaternary structure. Enzymes lower activation energy without changing ΔG (exergonic ΔG < 0 vs. endergonic ΔG > 0). Competitive inhibition (↑ apparent Km, unchanged Vmax); noncompetitive inhibition (unchanged Km, ↓ Vmax); allosteric regulation"],
+                    ["Carbohydrates, GAGs & Lipids", "Monosaccharides (glucose, fructose, galactose, ribose), disaccharides (maltose, lactose, sucrose), polysaccharides (starch, glycogen, cellulose). GAGs (hyaluronic acid, chondroitin sulfate, heparin, keratan/dermatan sulfate). Saturated vs. unsaturated fatty acids; essential fatty acids: linoleic (ω-6) & α-linolenic (ω-3)"],
+                    ["Steroids, Cholesterol Synthesis & Lipoproteins", "Cholesterol synthesized from acetyl-CoA via HMG-CoA reductase (rate-limiting); precursor to steroid hormones and bile salts. Lipoproteins: chylomicrons, VLDL, IDL, LDL, HDL"]
+                  ]
+                }
+              ]
+            },
+            {
+              id: "biochem-nucleic-metabolic-pathways",
+              title: "Nucleic Acids/Purine Metabolism/DNA Replication, Transcription & Translation, Metabolic Pathways Overview/Well-Fed vs Fasting State, Glycolysis & Aerobic vs Anaerobic, Pyruvate Dehydrogenase Complex, Krebs Cycle & Electron Transport Chain, CoQ10 & Chemiosmosis/ATP Synthase, Glycogen Synthesis/Glycogen Degradation & HMP Shunt, Fatty Acid Synthesis & Fatty Acid Degradation, Gluconeogenesis, Cori Cycle & Urea Cycle",
+              pageRef: "Pages 8–23",
+              tables: [
+                {
+                  headers: ["Pathway / Molecular Process", "Clean Board Summary"],
+                  rows: [
+                    ["Nucleic Acids, Replication, Transcription & Translation", "Purines (A, G) & pyrimidines (C, T, U); base pairing A=T (2 H-bonds), G≡C (3 H-bonds). Semiconservative 5'→3' DNA replication; RNA transcription (5'→3') & mRNA processing; ribosome translation (AUG start; UAA, UAG, UGA stop)"],
+                    ["Glycolysis & Pyruvate Dehydrogenase", "Glycolysis in cytosol (PFK-1 is key regulated step); pyruvate → lactate (anaerobic) or acetyl-CoA via PDH complex (requires B1, B2, B3, B5, lipoamide in mitochondria)"],
+                    ["Krebs Cycle, ETC, CoQ10 & ATP Synthase", "Citric acid cycle in mitochondrial matrix generates NADH, FADH2, GTP/ATP, CO2. Electron transport chain (Complexes I–IV) & CoQ10/cytochrome c establish H+ gradient driving ATP synthase (chemiosmosis)"],
+                    ["Glycogen, HMP Shunt & Fatty Acid Metabolism", "Glycogenesis (glycogen synthase) & glycogenolysis (glycogen phosphorylase). HMP shunt/pentose phosphate pathway (G6PD) produces NADPH & ribose-5-phosphate. Fatty acid synthesis (acetyl-CoA carboxylase, cytosol) vs. β-oxidation (carnitine shuttle, mitochondria)"],
+                    ["Gluconeogenesis, Cori Cycle & Urea Cycle", "Gluconeogenesis (fructose-1,6-bisphosphatase, glucose-6-phosphatase) synthesizes glucose from non-carbohydrate precursors. Cori cycle links muscle lactate to hepatic gluconeogenesis. Urea cycle (CPS-I) detoxifies ammonia into urea"]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: "pathology",
+          name: "Pathology",
+          pages: "Pages 1–16",
+          description: "Cellular injury & growth adaptations, systemic organ pathology, infectious/STD/metabolic/GI/neuro/hematologic disorders, genetics & neoplasia, bone tumors, arthritides, AVN, osteomyelitis, fractures, and nails.",
+          topics: [
+            {
+              id: "path-degeneration-growth-organ-std",
+              title: "Types of Degeneration, Disturbances of Growth & Collagen Types, Pneumoconiosis, Lung Diseases & Renal Diseases, Thyroid & Adrenal Diseases, Urogenital & Venereal Diseases, Chancroid/Chlamydia/Gonorrhea/LGV/Trichomoniasis & Metabolic Disorders & GI Disorders, Crohn's through Volvulus",
+              pageRef: "Pages 1–6",
+              tables: [
+                {
+                  headers: ["Pathology Group", "Clean Board Summary"],
+                  rows: [
+                    ["Degeneration, Growth & Collagen Types", "Degeneration (hydropic/cloudy swelling, fatty change, hyaline, amyloid); necrosis (coagulative, liquefactive, caseous, fat, fibrinoid). Growth: atrophy, hypertrophy, hyperplasia, metaplasia, dysplasia, neoplasia. Collagen types I–IV defects (e.g., osteogenesis imperfecta, Ehlers-Danlos, Alport)"],
+                    ["Pneumoconiosis, Lung & Renal Diseases", "Silicosis, asbestosis, coal worker's pneumoconiosis, COPD (emphysema/chronic bronchitis), asthma, lung neoplasms. Glomerular nephritic vs. nephrotic syndromes, nephrolithiasis, renal failure"],
+                    ["Thyroid & Adrenal Diseases", "Hyperthyroidism/Graves, hypothyroidism/Hashimoto, goiter, thyroid nodules/neoplasms. Cushing syndrome (excess cortisol), Addison disease (adrenal insufficiency), pheochromocytoma"],
+                    ["Urogenital, STDs, Metabolic & GI Disorders", "Syphilis (Treponema pallidum), gonorrhea (Neisseria gonorrhoeae), chlamydia & LGV (Chlamydia trachomatis), chancroid (Haemophilus ducreyi), trichomoniasis (Trichomonas vaginalis). Metabolic/GI disorders from esophagitis, gastritis, peptic ulcer, malabsorption, Crohn disease, ulcerative colitis, diverticulitis, and volvulus"]
+                  ]
+                }
+              ]
+            },
+            {
+              id: "path-neuro-heme-genetics-neoplasia",
+              title: "ALS/Alzheimer's/Arnold Chiari, Brain Tumors through Wernicke-Korsakoff & Immune/Blood Terminology, Immune Cells/WBCs/Inflammatory Substances, Stages of Inflammation/Blood Cell Disorders/Hemophilia/Anemias, Polycythemia/Thrombocytopenia/Heart & Blood Vessel Diseases/Leukemia, Genetic Diseases, Tumors/Cancers/Cysts",
+              pageRef: "Pages 6–10",
+              tables: [
+                {
+                  headers: ["Systemic & Neoplastic Topic", "Clean Board Summary"],
+                  rows: [
+                    ["Neurologic & Wernicke-Korsakoff", "ALS, Alzheimer disease, Arnold-Chiari malformation, multiple sclerosis, Parkinson disease, intracranial neoplasms, stroke/hemorrhage, and Wernicke-Korsakoff syndrome"],
+                    ["Immune Cells, Inflammation & Blood Disorders", "Neutrophils, eosinophils, basophils, lymphocytes, monocytes/macrophages; vasoactive/inflammatory mediators; acute & chronic inflammation. Anemias (iron deficiency, B12/folate megaloblastic, aplastic, hemolytic/sickle cell), hemophilia, polycythemia, thrombocytopenia, leukemias"],
+                    ["Cardiovascular & Vascular Pathology", "Atherosclerosis, myocardial ischemia/infarction, valvular disease, heart failure, aneurysms, thrombosis/embolism, hypertension"],
+                    ["Genetic Diseases, Tumors, Cancers & Cysts", "Chromosomal & Mendelian disorders (e.g., trisomy 21, Turner, Klinefelter, Marfan), benign vs. malignant neoplasms, staging/grading, and cystic lesions"]
+                  ]
+                }
+              ]
+            },
+            {
+              id: "path-bone-tumors-arthritides-ortho",
+              title: "Benign Bone Tumors, Malignant Bone Tumors, Inflammatory Arthritides, Degenerative & Metabolic Arthritides, Avascular Necrosis/Osteomyelitis/Fractures/Fingernails",
+              pageRef: "Pages 11–16",
+              tables: [
+                {
+                  headers: ["Musculoskeletal Pathology Topic", "Clean Board Summary"],
+                  rows: [
+                    ["Benign Bone Tumors", "Osteochondroma (cartilage-capped exostosis), osteoid osteoma (nocturnal pain relieved by NSAIDs/aspirin), osteoblastoma, giant cell tumor/osteoclastoma, enchondroma, fibrous dysplasia"],
+                    ["Malignant Bone Tumors", "Osteosarcoma (malignant osteoid production), chondrosarcoma (malignant cartilage), Ewing sarcoma (small round blue cell, diaphyseal/pelvic), multiple myeloma (plasma cell malignancy), skeletal metastases"],
+                    ["Inflammatory Arthritides", "Rheumatoid arthritis (symmetric pannus synovitis, RF/anti-CCP) and seronegative spondyloarthropathies (ankylosing spondylitis, psoriatic arthritis, reactive arthritis, IBD arthritis — HLA-B27 associations)"],
+                    ["Degenerative & Metabolic Arthritides", "Osteoarthritis/DJD (joint space narrowing, osteophytes, subchondral sclerosis & cysts; Heberden/Bouchard nodes), gout (monosodium urate crystals), CPPD/pseudogout (calcium pyrophosphate crystals)"],
+                    ["AVN, Osteomyelitis, Fractures & Fingernails", "Avascular necrosis (femoral head, scaphoid, lunate), osteomyelitis (sequestrum, involucrum), fracture patterns (greenstick, comminuted, Colles, Smith, stress), and nail findings (clubbing, koilonychia, Beau lines, onycholysis)"]
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: "microbiology",
+          name: "Microbiology & Public Health",
+          pages: "Pages 1–7",
+          description: "Immunology, vaccines & hypersensitivity, diagnostic stains & inclusion bodies, epidemiology & public health agencies, microbial traits, and helminths.",
+          topics: [
+            {
+              id: "micro-immunology-stains-inclusions",
+              title: "Terms & Definitions/Antibodies vs Antigens, Interleukins/MHC/Complement/Immunity, Vaccinations/Hypersensitivity Reactions/Lab Tests & Stains, Gram Stain/Specific Lab Tests/Inclusion Bodies",
+              pageRef: "Pages 1–3",
+              tables: [
+                {
+                  headers: ["Immunology & Diagnostics Topic", "Clean Board Summary"],
+                  rows: [
+                    ["Terms, Antibodies vs. Antigens", "Antigens vs. antibodies (IgG, IgA, IgM, IgE, IgD); toxins, toxoids, antitoxins, haptens, opsonins, vectors, fomites"],
+                    ["Interleukins, MHC, Complement & Immunity", "Interleukins (IL-1, IL-2, etc.), MHC Class I (CD8+ T cells) & Class II (CD4+ T cells), complement cascade (opsonization C3b, anaphylatoxins C3a/C5a, MAC C5b–C9), active vs. passive and natural vs. artificial immunity"],
+                    ["Vaccinations & Hypersensitivity", "Live attenuated, inactivated/killed, and toxoid vaccines. Hypersensitivity: Type I (IgE/mast cells), Type II (IgG/IgM cytotoxic), Type III (immune complexes), Type IV (delayed T-cell mediated)"],
+                    ["Stains, Gram Stain, Lab Tests & Inclusion Bodies", "Gram stain (Gram-positive thick peptidoglycan purple vs. Gram-negative thin peptidoglycan/LPS pink), acid-fast stain (mycobacteria), India ink/silver stains, serologic/microbiologic tests. Inclusion bodies: Negri bodies (rabies), owl's eye (CMV), Cowdry type A (HSV/VZV), Guarnieri (smallpox), Aschoff bodies (rheumatic fever), Councilman bodies (yellow fever/viral hepatitis)"]
+                  ]
+                }
+              ]
+            },
+            {
+              id: "micro-epidemiology-microbes-helminths",
+              title: "Population Terminology/Governmental Agencies/Studies/Drugs, Microbial Lifestyles/Flagella/Color of Pus/Organism Shapes, Helminths: Cestodes, Trematodes, Roundworms",
+              pageRef: "Pages 4–7",
+              tables: [
+                {
+                  headers: ["Public Health & Organism Topic", "Clean Board Summary"],
+                  rows: [
+                    ["Population Terms, Agencies, Studies & Drugs", "Endemic, epidemic, pandemic, incidence, prevalence, morbidity, mortality. Agencies: CDC, NIH, FDA, OSHA, EPA, USDA. Study designs (case-control, cohort, cross-sectional, clinical trial); sensitivity & specificity; bactericidal vs. bacteriostatic drugs"],
+                    ["Lifestyles, Flagella, Pus Color & Shapes", "Obligate aerobes, obligate anaerobes, facultative anaerobes, obligate intracellular organisms. Flagella arrangements (monotrichous, lophotrichous, amphitrichous, peritrichous). Pus colors/exudates and cocci, bacilli, and spiral/spirochete morphologies"],
+                    ["Helminths: Cestodes, Trematodes & Roundworms", "Cestodes/tapeworms (Taenia solium, Taenia saginata, Diphyllobothrium latum, Echinococcus granulosus), trematodes/flukes (Schistosoma spp., Clonorchis sinensis, Fasciola hepatica), and nematodes/roundworms (Enterobius vermicularis, Ascaris lumbricoides, hookworms, Trichinella spiralis, Wuchereria bancrofti)"]
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    };
+
+    /* =====================================================================
+       2. FLASHCARD & QUIZ BUILDERS FROM CLEAN DATASET
+       ===================================================================== */
+    function buildFlashcards(data) {
+      const cards = [];
+      data.subjects.forEach((subj) => {
+        subj.topics.forEach((topic) => {
+          (topic.tables || []).forEach((tbl) => {
+            tbl.rows.forEach((row) => {
+              if (row.length >= 2) {
+                cards.push({
+                  subjectId: subj.id,
+                  subjectName: subj.name,
+                  topicTitle: topic.title,
+                  pageRef: topic.pageRef,
+                  prompt: row[0],
+                  answer: row[1]
+                });
+              }
+            });
+          });
+          (topic.keyPoints || []).forEach((pt, idx) => {
+            cards.push({
+              subjectId: subj.id,
+              subjectName: subj.name,
+              topicTitle: topic.title,
+              pageRef: topic.pageRef,
+              prompt: `${topic.title} — Board Pearl #${idx + 1}`,
+              answer: pt
+            });
+          });
+        });
+      });
+      return cards;
+    }
+
+    function buildQuizPool(data) {
+      const items = [];
+      data.subjects.forEach((subj) => {
+        subj.topics.forEach((topic) => {
+          (topic.tables || []).forEach((tbl) => {
+            tbl.rows.forEach((row) => {
+              if (row.length >= 2) {
+                items.push({
+                  subjectId: subj.id,
+                  subjectName: subj.name,
+                  topicTitle: topic.title,
+                  pageRef: topic.pageRef,
+                  term: row[0],
+                  correctAnswer: row[1]
+                });
+              }
+            });
+          });
+        });
+      });
+      return items;
+    }
+
+    const ALL_FLASHCARDS = buildFlashcards(NBCE_PART1_DATA);
+    const ALL_QUIZ_ITEMS = buildQuizPool(NBCE_PART1_DATA);
+
+    /* =====================================================================
+       3. APPLICATION STATE & LOCAL STORAGE HELPERS
+       ===================================================================== */
+    const STORAGE_KEY = "irene_gold_part1_mastered_v1";
+
+    function loadMasteredSet() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        const parsed = raw ? JSON.parse(raw) : [];
+        return new Set(Array.isArray(parsed) ? parsed : []);
+      } catch (_err) {
+        return new Set();
+      }
+    }
+
+    function saveMasteredSet(setObj) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify([...setObj]));
+      } catch (_err) {
+        // Ignore storage quota errors in restricted environments
+      }
+    }
+
+    const appState = {
+      activeTab: "notes",
+      activeSubjectId: NBCE_PART1_DATA.subjects[0].id,
+      searchQuery: "",
+      allCollapsed: false,
+      masteredIds: loadMasteredSet(),
+      // Flashcards
+      cardFilter: "ALL",
+      deck: [...ALL_FLASHCARDS],
+      cardIndex: 0,
+      cardFlipped: false,
+      // Quiz
+      quizFilter: "ALL",
+      currentQuestion: null,
+      quizAnswered: false,
+      quizScore: 0,
+      quizTotal: 0
+    };
+
+    /* =====================================================================
+       4. UI HELPERS: TOAST, HIGHLIGHT & JSON EXPORT
+       ===================================================================== */
+    let toastTimer = null;
+    function showToast(message) {
+      const banner = document.getElementById("toastBanner");
+      banner.textContent = message;
+      banner.classList.add("visible");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        banner.classList.remove("visible");
+      }, 2400);
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function highlightMatch(text, query) {
+      const safe = escapeHtml(text);
+      if (!query) return safe;
+      const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+      const regex = new RegExp(`(${escapedQuery})`, "gi");
+      return safe.replace(regex, '<mark class="search-hit">$1</mark>');
+    }
+
+    function downloadCleanJsonFile() {
+      const formatted = JSON.stringify(NBCE_PART1_DATA, null, 2);
+      const blob = new Blob([formatted], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = NBCE_PART1_DATA.metadata.exportFilename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      showToast("Downloaded nbce_part1_clean_board_review.json");
+    }
+
+    function copyCleanJson() {
+      const formatted = JSON.stringify(NBCE_PART1_DATA, null, 2);
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(formatted).then(
+          () => showToast("Copied clean JSON to clipboard"),
+          () => fallbackCopy(formatted)
+        );
+      } else {
+        fallbackCopy(formatted);
+      }
+    }
+
+    function fallbackCopy(text) {
+      const ta = document.createElement("textarea");
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand("copy");
+        showToast("Copied clean JSON to clipboard");
+      } catch (_e) {
+        showToast("Unable to copy JSON automatically");
+      }
+      document.body.removeChild(ta);
+    }
+
+    /* =====================================================================
+       5. RENDERERS: SUBJECT PILLS, SIDEBAR, NOTES, FLASHCARDS & QUIZ
+       ===================================================================== */
+    function getTotalTopicsCount() {
+      return NBCE_PART1_DATA.subjects.reduce((sum, s) => sum + s.topics.length, 0);
+    }
+
+    function updateMasteryDisplay() {
+      const total = getTotalTopicsCount();
+      const mastered = appState.masteredIds.size;
+      const pct = total > 0 ? Math.round((mastered / total) * 100) : 0;
+      document.getElementById("masteryCountText").textContent = `${mastered} / ${total}`;
+      document.getElementById("masteryBarFill").style.width = `${pct}%`;
+    }
+
+    function toggleMastered(topicId) {
+      if (appState.masteredIds.has(topicId)) {
+        appState.masteredIds.delete(topicId);
+      } else {
+        appState.masteredIds.add(topicId);
+      }
+      saveMasteredSet(appState.masteredIds);
+      updateMasteryDisplay();
+      renderSidebar();
+      renderNotesView();
+    }
+
+    function renderSubjectPills() {
+      const container = document.getElementById("subjectPillsContainer");
+      container.innerHTML = "";
+
+      NBCE_PART1_DATA.subjects.forEach((subj) => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        const isActive = subj.id === appState.activeSubjectId && !appState.searchQuery;
+        btn.className = `subject-pill ${isActive ? "active" : ""}`;
+        btn.innerHTML = `
+          <span>${escapeHtml(subj.name)}</span>
+          <span class="pill-count">${subj.topics.length}</span>
+        `;
+        btn.addEventListener("click", () => {
+          appState.activeSubjectId = subj.id;
+          appState.searchQuery = "";
+          document.getElementById("searchInput").value = "";
+          switchTab("notes");
+          renderAll();
+        });
+        container.appendChild(btn);
+      });
+    }
+
+    function renderSidebar() {
+      const navList = document.getElementById("topicNavList");
+      const currentSubj =
+        NBCE_PART1_DATA.subjects.find((s) => s.id === appState.activeSubjectId) ||
+        NBCE_PART1_DATA.subjects[0];
+
+      document.getElementById("sidebarTopicCount").textContent = String(currentSubj.topics.length);
+      navList.innerHTML = "";
+
+      currentSubj.topics.forEach((topic) => {
+        const isDone = appState.masteredIds.has(topic.id);
+        const link = document.createElement("a");
+        link.href = `#${topic.id}`;
+        link.className = "topic-nav-item";
+        link.innerHTML = `
+          <span>${escapeHtml(topic.title)}</span>
+          ${isDone ? '<span class="topic-nav-check" title="Mastered">✓</span>' : ""}
+        `;
+        link.addEventListener("click", (e) => {
+          e.preventDefault();
+          switchTab("notes");
+          const el = document.getElementById(topic.id);
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        });
+        navList.appendChild(link);
+      });
+    }
+
+    function renderNotesView() {
+      const query = appState.searchQuery.trim();
+      const lowerQuery = query.toLowerCase();
+      const banner = document.getElementById("subjectBanner");
+      const searchBanner = document.getElementById("searchStatusBanner");
+      const topicsContainer = document.getElementById("topicsContainer");
+
+      let entries = [];
+
+      if (lowerQuery) {
+        banner.style.display = "none";
+        searchBanner.style.display = "flex";
+
+        NBCE_PART1_DATA.subjects.forEach((subj) => {
+          subj.topics.forEach((topic) => {
+            const haystack = JSON.stringify(topic).toLowerCase() + " " + subj.name.toLowerCase();
+            if (haystack.includes(lowerQuery)) {
+              entries.push({ subject: subj, topic });
+            }
+          });
+        });
+
+        document.getElementById("searchStatusText").textContent =
+          `Search for "${query}" matched ${entries.length} topic section(s) across all 6 subjects.`;
+      } else {
+        banner.style.display = "flex";
+        searchBanner.style.display = "none";
+
+        const subj =
+          NBCE_PART1_DATA.subjects.find((s) => s.id === appState.activeSubjectId) ||
+          NBCE_PART1_DATA.subjects[0];
+
+        document.getElementById("bannerSubjectBadge").textContent = subj.name;
+        document.getElementById("bannerPagesTag").textContent = subj.pages;
+        document.getElementById("bannerSubjectTitle").textContent = subj.name;
+        document.getElementById("bannerSubjectDesc").textContent = subj.description;
+
+        entries = subj.topics.map((topic) => ({ subject: subj, topic }));
+      }
+
+      if (entries.length === 0) {
+        topicsContainer.innerHTML = `
+          <div class="topic-card">
+            <div class="topic-body">
+              <div style="font-weight: 700; color: #ffffff;">No matching board review sections found.</div>
+              <div style="font-size: 13px; color: var(--text-muted);">Try another keyword such as "collagen", "cranial", "RAAS", "ketogenic", "gout", or "helminths".</div>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      topicsContainer.innerHTML = entries
+        .map(({ subject, topic }) => {
+          const isMastered = appState.masteredIds.has(topic.id);
+
+          const tablesHtml = (topic.tables || [])
+            .map(
+              (tbl) => `
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      ${tbl.headers.map((h) => `<th>${highlightMatch(h, query)}</th>`).join("")}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${tbl.rows
+                      .map(
+                        (row) => `
+                        <tr>
+                          ${row
+                            .map(
+                              (cell, colIdx) =>
+                                `<td class="${colIdx === 0 ? "col-key" : ""}">${highlightMatch(cell, query)}</td>`
+                            )
+                            .join("")}
+                        </tr>
+                      `
+                      )
+                      .join("")}
+                  </tbody>
+                </table>
+              </div>
+            `
+            )
+            .join("");
+
+          const pearlsHtml =
+            topic.keyPoints && topic.keyPoints.length > 0
+              ? `
+              <div class="pearls-box">
+                <div class="pearls-title">High-Yield Board Pearls</div>
+                <ul class="pearls-list">
+                  ${topic.keyPoints.map((pt) => `<li>${highlightMatch(pt, query)}</li>`).join("")}
+                </ul>
+              </div>
+            `
+              : "";
+
+          return `
+            <article id="${escapeHtml(topic.id)}" class="topic-card ${isMastered ? "mastered" : ""}">
+              <div class="topic-header">
+                <div class="topic-title-wrap">
+                  <span class="badge">${escapeHtml(subject.name)} • ${escapeHtml(topic.pageRef)}</span>
+                  <h2 class="topic-title">${highlightMatch(topic.title, query)}</h2>
+                </div>
+                <label class="mastery-checkbox-label">
+                  <input
+                    type="checkbox"
+                    ${isMastered ? "checked" : ""}
+                    onchange="toggleMastered('${escapeHtml(topic.id)}')"
+                  />
+                  <span>${isMastered ? "Mastered ✓" : "Mark Mastered"}</span>
+                </label>
+              </div>
+              <div class="topic-body ${appState.allCollapsed ? "hidden-body" : ""}">
+                ${tablesHtml}
+                ${pearlsHtml}
+              </div>
+            </article>
+          `;
+        })
+        .join("");
+    }
+
+    function applyFlashcardFilter() {
+      appState.deck =
+        appState.cardFilter === "ALL"
+          ? [...ALL_FLASHCARDS]
+          : ALL_FLASHCARDS.filter((c) => c.subjectId === appState.cardFilter);
+      appState.cardIndex = 0;
+      appState.cardFlipped = false;
+      renderFlashcard();
+    }
+
+    function renderFlashcard() {
+      const stage = document.getElementById("flashcardStage");
+      const sideLabel = document.getElementById("flashcardSideLabel");
+      const mainText = document.getElementById("flashcardMainText");
+      const subText = document.getElementById("flashcardSubText");
+
+      if (appState.deck.length === 0) {
+        document.getElementById("flashcardProgressLabel").textContent = "Card 0 of 0";
+        sideLabel.textContent = "Empty";
+        mainText.textContent = "No flashcards for this filter.";
+        subText.textContent = "";
+        return;
+      }
+
+      const card = appState.deck[appState.cardIndex];
+      document.getElementById("flashcardProgressLabel").textContent =
+        `Card ${appState.cardIndex + 1} of ${appState.deck.length}`;
+      document.getElementById("flashcardTopicLabel").textContent =
+        `${card.subjectName} (${card.pageRef})`;
+
+      stage.classList.toggle("flipped", appState.cardFlipped);
+      if (appState.cardFlipped) {
+        sideLabel.textContent = "Board Answer";
+        mainText.textContent = card.answer;
+        subText.textContent = card.topicTitle;
+      } else {
+        sideLabel.textContent = "Prompt";
+        mainText.textContent = card.prompt;
+        subText.textContent = "Click card or press Flip Card to reveal answer";
+      }
+    }
+
+    function generateQuizQuestion() {
+      appState.quizAnswered = false;
+      const feedbackBox = document.getElementById("quizFeedbackBox");
+      feedbackBox.style.display = "none";
+
+      const pool =
+        appState.quizFilter === "ALL"
+          ? ALL_QUIZ_ITEMS
+          : ALL_QUIZ_ITEMS.filter((q) => q.subjectId === appState.quizFilter);
+
+      const sourcePool = pool.length >= 4 ? pool : ALL_QUIZ_ITEMS;
+      const target = sourcePool[Math.floor(Math.random() * sourcePool.length)];
+
+      const used = new Set([target.correctAnswer]);
+      const distractors = [];
+      let guard = 0;
+      while (distractors.length < 3 && guard < 200) {
+        guard += 1;
+        const cand = sourcePool[Math.floor(Math.random() * sourcePool.length)];
+        if (!used.has(cand.correctAnswer)) {
+          used.add(cand.correctAnswer);
+          distractors.push(cand.correctAnswer);
+        }
+      }
+
+      const options = [target.correctAnswer, ...distractors].sort(() => Math.random() - 0.5);
+      appState.currentQuestion = { ...target, options };
+
+      document.getElementById("quizSubjectBadge").textContent = target.subjectName;
+      document.getElementById("quizTopicMeta").textContent = `${target.topicTitle} • ${target.pageRef}`;
+      document.getElementById("quizQuestionHeading").textContent =
+        `Which summary corresponds to "${target.term}"?`;
+
+      const optContainer = document.getElementById("quizOptionsContainer");
+      optContainer.innerHTML = options
+        .map(
+          (opt, idx) => `
+          <button class="quiz-opt-btn" type="button" data-idx="${idx}">
+            <span class="quiz-opt-letter">${String.fromCharCode(65 + idx)}</span>
+            <span>${escapeHtml(opt)}</span>
+          </button>
+        `
+        )
+        .join("");
+
+      optContainer.querySelectorAll(".quiz-opt-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          submitQuizChoice(Number(btn.dataset.idx));
+        });
+      });
+    }
+
+    function submitQuizChoice(chosenIdx) {
+      if (appState.quizAnswered || !appState.currentQuestion) return;
+      appState.quizAnswered = true;
+      appState.quizTotal += 1;
+
+      const chosenText = appState.currentQuestion.options[chosenIdx];
+      const isRight = chosenText === appState.currentQuestion.correctAnswer;
+      if (isRight) appState.quizScore += 1;
+
+      document.getElementById("quizScoreText").textContent = String(appState.quizScore);
+      document.getElementById("quizAnsweredText").textContent = String(appState.quizTotal);
+
+      document.querySelectorAll(".quiz-opt-btn").forEach((btn, idx) => {
+        btn.disabled = true;
+        const text = appState.currentQuestion.options[idx];
+        if (text === appState.currentQuestion.correctAnswer) {
+          btn.classList.add("correct");
+        } else if (idx === chosenIdx && !isRight) {
+          btn.classList.add("wrong");
+        }
+      });
+
+      const feedbackBox = document.getElementById("quizFeedbackBox");
+      feedbackBox.style.display = "block";
+      feedbackBox.style.borderColor = isRight
+        ? "rgba(16, 185, 129, 0.5)"
+        : "rgba(244, 63, 94, 0.5)";
+      feedbackBox.innerHTML = `
+        <strong style="color: ${isRight ? "#6ee7b7" : "#fda4af"};">${isRight ? "Correct" : "Incorrect"}:</strong>
+        <span style="color: var(--text-primary);">${escapeHtml(appState.currentQuestion.term)} — ${escapeHtml(appState.currentQuestion.correctAnswer)}</span>
+      `;
+    }
+
+    function switchTab(tabName) {
+      appState.activeTab = tabName;
+      document.getElementById("tabNotes").classList.toggle("active", tabName === "notes");
+      document.getElementById("tabFlashcards").classList.toggle("active", tabName === "flashcards");
+      document.getElementById("tabQuiz").classList.toggle("active", tabName === "quiz");
+
+      document.getElementById("notesView").classList.toggle("active", tabName === "notes");
+      document.getElementById("flashcardsView").classList.toggle("active", tabName === "flashcards");
+      document.getElementById("quizView").classList.toggle("active", tabName === "quiz");
+
+      if (tabName === "flashcards") {
+        renderFlashcard();
+      } else if (tabName === "quiz" && !appState.currentQuestion) {
+        generateQuizQuestion();
+      }
+    }
+
+    function openJsonModal() {
+      document.getElementById("jsonModalPre").textContent = JSON.stringify(NBCE_PART1_DATA, null, 2);
+      document.getElementById("jsonModal").classList.add("open");
+    }
+
+    function closeJsonModal() {
+      document.getElementById("jsonModal").classList.remove("open");
+    }
+
+    function renderAll() {
+      updateMasteryDisplay();
+      renderSubjectPills();
+      renderSidebar();
+      renderNotesView();
+    }
+
+    /* =====================================================================
+       6. INITIALIZATION & EVENT BINDINGS
+       ===================================================================== */
+    function init() {
+      const fcSelect = document.getElementById("flashcardSubjectSelect");
+      const qzSelect = document.getElementById("quizSubjectSelect");
+
+      NBCE_PART1_DATA.subjects.forEach((subj) => {
+        const optFc = document.createElement("option");
+        optFc.value = subj.id;
+        optFc.textContent = subj.name;
+        fcSelect.appendChild(optFc);
+
+        const optQz = document.createElement("option");
+        optQz.value = subj.id;
+        optQz.textContent = subj.name;
+        qzSelect.appendChild(optQz);
+      });
+
+      document.getElementById("tabNotes").addEventListener("click", () => switchTab("notes"));
+      document.getElementById("tabFlashcards").addEventListener("click", () => switchTab("flashcards"));
+      document.getElementById("tabQuiz").addEventListener("click", () => switchTab("quiz"));
+
+      const searchInput = document.getElementById("searchInput");
+      searchInput.addEventListener("input", (e) => {
+        appState.searchQuery = e.target.value;
+        switchTab("notes");
+        renderSubjectPills();
+        renderNotesView();
+      });
+
+      const resetSearch = () => {
+        appState.searchQuery = "";
+        searchInput.value = "";
+        renderSubjectPills();
+        renderNotesView();
+      };
+
+      document.getElementById("clearSearchBtn").addEventListener("click", resetSearch);
+      document.getElementById("resetSearchBtn").addEventListener("click", resetSearch);
+
+      document.getElementById("expandAllBtn").addEventListener("click", () => {
+        appState.allCollapsed = false;
+        renderNotesView();
+      });
+
+      document.getElementById("collapseAllBtn").addEventListener("click", () => {
+        appState.allCollapsed = true;
+        renderNotesView();
+      });
+
+      // Flashcards controls
+      fcSelect.addEventListener("change", (e) => {
+        appState.cardFilter = e.target.value;
+        applyFlashcardFilter();
+      });
+
+      document.getElementById("shuffleCardsBtn").addEventListener("click", () => {
+        appState.deck.sort(() => Math.random() - 0.5);
+        appState.cardIndex = 0;
+        appState.cardFlipped = false;
+        renderFlashcard();
+        showToast("Shuffled flashcard deck");
+      });
+
+      const flipCard = () => {
+        appState.cardFlipped = !appState.cardFlipped;
+        renderFlashcard();
+      };
+
+      document.getElementById("flashcardStage").addEventListener("click", flipCard);
+      document.getElementById("flashcardStage").addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          flipCard();
+        }
+      });
+      document.getElementById("flipCardBtn").addEventListener("click", flipCard);
+
+      document.getElementById("prevCardBtn").addEventListener("click", () => {
+        if (appState.deck.length === 0) return;
+        appState.cardFlipped = false;
+        appState.cardIndex = (appState.cardIndex - 1 + appState.deck.length) % appState.deck.length;
+        renderFlashcard();
+      });
+
+      document.getElementById("nextCardBtn").addEventListener("click", () => {
+        if (appState.deck.length === 0) return;
+        appState.cardFlipped = false;
+        appState.cardIndex = (appState.cardIndex + 1) % appState.deck.length;
+        renderFlashcard();
+      });
+
+      // Quiz controls
+      qzSelect.addEventListener("change", (e) => {
+        appState.quizFilter = e.target.value;
+        generateQuizQuestion();
+      });
+      document.getElementById("nextQuizBtn").addEventListener("click", generateQuizQuestion);
+
+      // JSON modal & download
+      document.getElementById("openJsonModalBtn").addEventListener("click", openJsonModal);
+      document.getElementById("closeJsonModalBtn").addEventListener("click", closeJsonModal);
+      document.getElementById("jsonModal").addEventListener("click", (e) => {
+        if (e.target.id === "jsonModal") closeJsonModal();
+      });
+      document.getElementById("copyJsonBtn").addEventListener("click", copyCleanJson);
+      document.getElementById("downloadJsonBtn").addEventListener("click", downloadCleanJsonFile);
+      document.getElementById("modalDownloadJsonBtn").addEventListener("click", downloadCleanJsonFile);
+
+      // Render initial state immediately so content is visible on load
+      renderAll();
+      renderFlashcard();
+      generateQuizQuestion();
+    }
+
+    init();
+  </script>
+</body>
+</html>
